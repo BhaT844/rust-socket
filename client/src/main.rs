@@ -12,14 +12,14 @@ fn main() {
                 let mut message = String::new();
                 let     message = input(&mut message);
 
-                if message == b"/quit" {
-                    break;
-                }
-
                 stream.write(message).unwrap_or_else(|err| {
                     println!("데이터 전송 실패: {}", err);
                     process::exit(1);
                 });
+                
+                if message == b"/quit" {
+                    break;
+                }
 
                 let mut buffer = [0_u8; 50];
                 match stream.read(&mut buffer) {
@@ -41,5 +41,5 @@ fn main() {
 
 fn input<'a>(msg: &'a mut String) -> &'a [u8] {
     io::stdin().read_line(msg).unwrap();
-    msg.as_bytes()
+    msg.trim().as_bytes()
 }

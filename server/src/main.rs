@@ -34,24 +34,30 @@ fn handle_client(mut stream: TcpStream) {
 
     while match stream.read(&mut buffer) {
         Ok(size) => {
-            println!("{}: {}", stream.peer_addr().unwrap(), from_utf8(&buffer).unwrap());
+            if &buffer[0..size] == b"/quit" {
+                println!("{}님이 연결을 종료하였습니다.", stream.peer_addr().unwrap());
+                false
+            } else {
+                println!("{}: {}", stream.peer_addr().unwrap(), from_utf8(&buffer).unwrap());
 
-            for i in buffer.iter_mut() {
-                if
-                    65    <=    *i && *i    <=    90
-                {
-                    *i += 32;
+                for i in buffer.iter_mut() {
+                    if
+                        65    <=    *i && *i    <=    90
+                    {
+                        *i += 32;
+                    }
+    
+                    else if
+                        97    <=    *i && *i    <=    122
+                    {
+                        *i -= 32;
+                    }
                 }
 
-                else if
-                    97    <=    *i && *i    <=    122
-                {
-                    *i -= 32;
-                }
+                stream.write(&buffer[0..size]).unwrap();
+                buffer = [0_u8; 50];
+                true
             }
-
-            stream.write(&buffer[0..size]).unwrap();
-            true
         },
         Err(_) => {
             println!("오류가 발생하여 연결을 종료합니다: {}", stream.peer_addr().unwrap());
